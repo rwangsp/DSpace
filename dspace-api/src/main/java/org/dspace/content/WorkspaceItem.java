@@ -20,10 +20,12 @@ import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.log4j.Logger;
+
 
 /**
  * Class representing an item in the process of being submitted by a user
- * 
+ *
  * @author Robert Tansley
  * @version $Revision$
  */
@@ -31,6 +33,9 @@ import java.util.List;
 @Table(name = "workspaceitem")
 public class WorkspaceItem implements InProgressSubmission, Serializable, ReloadableEntity<Integer>
 {
+
+    /** log4j logger */
+    private static Logger log = Logger.getLogger(WorkspaceItem.class);
 
     @Id
     @Column(name = "workspace_item_id", unique = true, nullable = false)
@@ -86,7 +91,7 @@ public class WorkspaceItem implements InProgressSubmission, Serializable, Reload
 
     /**
      * Get the internal ID of this workspace item
-     * 
+     *
      * @return the internal identifier
      */
     @Override
@@ -97,7 +102,7 @@ public class WorkspaceItem implements InProgressSubmission, Serializable, Reload
 
     /**
      * Get the value of the stage reached column
-     * 
+     *
      * @return the value of the stage reached column
      */
     public int getStageReached()
@@ -107,7 +112,7 @@ public class WorkspaceItem implements InProgressSubmission, Serializable, Reload
 
     /**
      * Set the value of the stage reached column
-     * 
+     *
      * @param v
      *            the value of the stage reached column
      */
@@ -119,7 +124,7 @@ public class WorkspaceItem implements InProgressSubmission, Serializable, Reload
     /**
      * Get the value of the page reached column (which represents the page
      * reached within a stage/step)
-     * 
+     *
      * @return the value of the page reached column
      */
     public int getPageReached()
@@ -130,7 +135,7 @@ public class WorkspaceItem implements InProgressSubmission, Serializable, Reload
     /**
      * Set the value of the page reached column (which represents the page
      * reached within a stage/step)
-     * 
+     *
      * @param v
      *            the value of the page reached column
      */
@@ -207,7 +212,16 @@ public class WorkspaceItem implements InProgressSubmission, Serializable, Reload
     @Override
     public void setMultipleFiles(boolean b)
     {
+        log.info("setMultipleFiles() start");
+
+        if(b){
+            log.info("true");
+        } else {
+            log.info("false");
+        }
         multipleFiles = b;
+
+        log.info("setMultipleFiles() end");
     }
 
     @Override
