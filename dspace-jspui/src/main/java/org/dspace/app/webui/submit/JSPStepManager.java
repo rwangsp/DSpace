@@ -32,11 +32,11 @@ import org.dspace.submit.AbstractProcessingStep;
  * <P>
  * This manager is utilized by the SubmissionController to appropriately
  * load each JSP-UI step, and process any information returned by each step
- *
+ * 
  * @see org.dspace.submit.AbstractProcessingStep
  * @see org.dspace.app.webui.servlet.SubmissionController
  * @see org.dspace.app.webui.submit.JSPStep
- *
+ * 
  * @author Tim Donohue
  * @version $Revision$
  */
@@ -50,40 +50,40 @@ public class JSPStepManager
      * This is the class that performs processing of information entered in during a step
      */
     private AbstractProcessingStep stepProcessing = null;
-
+    
     /**
      * Current JSP-UI binding class for step that is being processed by the JSPStepManager
      * This is the class that manages calling all JSPs, and determines if additional processing
      * of information (or confirmation) is necessary.
      */
     private JSPStep stepJSPUI = null;
-
-    /**
-     * The SubmissionStepConfig object describing the current step
+    
+    /** 
+     * The SubmissionStepConfig object describing the current step 
      **/
     private SubmissionStepConfig stepConfig = null;
 
     /**
-     * Initialize the current JSPStepManager object, by loading the
+     * Initialize the current JSPStepManager object, by loading the 
      * specified step class.
-     *
+     * 
      * @param stepConfig
      *            the SubmissionStepConfig object which describes
      *            this step's configuration in the item-submission.xml
-     *
+     *            
      * @throws Exception
      *             if the JSPStep cannot be loaded or the class
      *             specified doesn't implement the JSPStep interface
      */
     public static JSPStepManager loadStep(SubmissionStepConfig stepConfig) throws Exception
     {
-
+        
         JSPStepManager stepManager = new JSPStepManager();
-
-        //save step configuration
+        
+        //save step configuration 
         stepManager.stepConfig = stepConfig;
-
-
+        
+        
         /*
          * First, load the step processing class (using the current class loader)
          */
@@ -92,7 +92,7 @@ public class JSPStepManager
                 .loadClass(stepConfig.getProcessingClassName());
 
         Object stepInstance =  stepClass.newInstance();
-
+        
         if(stepInstance instanceof AbstractProcessingStep)
         {
             // load the JSPStep interface for this step
@@ -100,12 +100,12 @@ public class JSPStepManager
         }
         else
         {
-            throw new Exception("The submission step class specified by '" + stepConfig.getProcessingClassName() +
+            throw new Exception("The submission step class specified by '" + stepConfig.getProcessingClassName() + 
                     "' does not extend the class org.dspace.submit.AbstractProcessingStep!" +
                     " Therefore it cannot be used by the Configurable Submission as the <processing-class>!");
         }
-
-
+        
+        
         /*
          * Next, load the step's JSPUI binding class (using the current class loader)
          * (Only load JSPUI binding class if specified...otherwise this is a non-interactive step)
@@ -116,7 +116,7 @@ public class JSPStepManager
                 	.loadClass(stepConfig.getJSPUIClassName());
 
         	stepInstance =  stepClass.newInstance();
-
+        
 	        if(stepInstance instanceof JSPStep)
 	        {
 	            // load the JSPStep interface for this step
@@ -124,7 +124,7 @@ public class JSPStepManager
 	        }
 	        else
 	        {
-	            throw new Exception("The submission step class specified by '" + stepConfig.getJSPUIClassName() +
+	            throw new Exception("The submission step class specified by '" + stepConfig.getJSPUIClassName() + 
 	                    "' does not extend the class org.dspace.app.webui.JSPStep!" +
 	                    " Therefore it cannot be used by the Configurable Submission for the JSP user interface!");
 	        }
@@ -132,7 +132,7 @@ public class JSPStepManager
         return stepManager;
     }
 
-
+    
     /**
      * Initialize the current JSPStepManager object, to prepare for processing
      * of this step. This method is called by the SubmissionController, and its
@@ -142,7 +142,7 @@ public class JSPStepManager
      * the user is completing this page (i.e. there is user input data that
      * needs to be saved to the database) or beginning this page (i.e. the user
      * needs to be sent to the JSP for this page).
-     *
+     * 
      * @param context
      *            a DSpace Context object
      * @param request
@@ -151,9 +151,9 @@ public class JSPStepManager
      *            the HTTP response
      * @param subInfo
      *            submission info object
-     *
+     * 
      * @return true if step is completed (successfully), false otherwise
-     *
+     * 
      * @throws ServletException
      *             if a general error occurs
      * @throws IOException
@@ -173,13 +173,9 @@ public class JSPStepManager
          * necessary. If you override this method, make sure you call the
          * "doStepStart()" and "doStepEnd()" methods at the appropriate time in
          * your processStep() method.
-         *
+         * 
          */
 
-        log.info("DEBUG --- processStep called");
-        log.info("DEBUG --- processStep SubmissionInfo value");
-        log.info(subInfo);
-        /*
         /*
          * Figure out Current Page in this Step
          */
@@ -258,7 +254,7 @@ public class JSPStepManager
     /**
      * Do the beginning of a Step. First do pre-processing, then display the JSP
      * (if there is one). If there's no JSP, just End the step immediately.
-     *
+     * 
      * @param context
      *            current DSpace context
      * @param request
@@ -267,28 +263,24 @@ public class JSPStepManager
      *            current servlet response object
      * @param subInfo
      *            submission info object
-     *
+     * 
      * @return true if the step is completed (no JSP was loaded), false
      *         otherwise
-     *
+     * 
      */
     private boolean doStepStart(Context context, HttpServletRequest request,
             HttpServletResponse response, SubmissionInfo subInfo)
             throws ServletException, IOException, SQLException,
             AuthorizeException
     {
-        log.info("Doing pre-processing for step " + this.getClass().getName());
+        log.debug("Doing pre-processing for step " + this.getClass().getName());
 
-        log.info("DEBUG -- Submission Info Value in doStepStart() ");
-        log.info(subInfo);
         // first, do any pre-processing and get the JSP to display
         // (assuming that this step has an interface)
         if(stepJSPUI!=null)
         {
-            log.info("DEBUG -- before entering doPreProcessing()");
             stepJSPUI.doPreProcessing(context, request, response, subInfo);
         }
-
 
         // Complete this step, if this response has not already
         // been committed.
@@ -302,7 +294,7 @@ public class JSPStepManager
             // There's no JSP to display, so only perform the processing
             // and forward back to the Submission Controller servlet
 
-            log.info("Calling processing for step "
+            log.debug("Calling processing for step "
                     + this.getClass().getName());
             int errorFlag = stepProcessing.doProcessing(context, request, response, subInfo);
 
@@ -337,7 +329,7 @@ public class JSPStepManager
     /**
      * This method actually displays a JSP page for this "step". This method can
      * be called from "doPostProcessing()" to display an error page, etc.
-     *
+     * 
      * @param request
      *            current servlet request object
      * @param response
@@ -346,7 +338,7 @@ public class JSPStepManager
      *            submission info object
      * @param pathToJSP
      *            context path to the JSP to display
-     *
+     * 
      */
     public static final void showJSP(HttpServletRequest request,
             HttpServletResponse response, SubmissionInfo subInfo,
@@ -383,7 +375,7 @@ public class JSPStepManager
      * Do the end of a Step. If "cancel" or "progress bar" was pressed, we need
      * to forward back to the SubmissionManagerServlet immediately. Otherwise,
      * do Post-processing, and figure out if this step is truly finished or not.
-     *
+     * 
      * @param context
      *            current DSpace context
      * @param request
@@ -393,7 +385,7 @@ public class JSPStepManager
      * @param subInfo
      *            submission info object
      * @return true if the step is completed (successfully), false otherwise
-     *
+     * 
      */
     private boolean doStepEnd(Context context, HttpServletRequest request,
             HttpServletResponse response, SubmissionInfo subInfo)
@@ -402,11 +394,11 @@ public class JSPStepManager
     {
         // we've returned from the JSP page
         // and need to do the processing for this step
-        log.info("Calling processing for step " + this.getClass().getName());
+        log.debug("Calling processing for step " + this.getClass().getName());
 
         int status = stepProcessing.doProcessing(context, request, response, subInfo);
 
-        log.info("Calling post-processing for step "
+        log.debug("Calling post-processing for step "
                 + this.getClass().getName());
 
         // After doing the processing, we have to do any post-processing
@@ -415,7 +407,7 @@ public class JSPStepManager
         stepJSPUI.doPostProcessing(context, request, response, subInfo, status);
 
         int currentPage = AbstractProcessingStep.getCurrentPage(request);
-
+        
         // Assuming step didn't forward back to a JSP during
         // post-processing, then check to see if this is the last page!
         if (!response.isCommitted())
@@ -454,7 +446,7 @@ public class JSPStepManager
      * This method completes the processing of this "step" and forwards the
      * request back to the SubmissionController (so that the next step can be
      * called).
-     *
+     * 
      * @param context
      *            current DSpace context
      * @param request
@@ -463,7 +455,7 @@ public class JSPStepManager
      *            current servlet response object
      * @param subInfo
      *            submission info object
-     *
+     * 
      * @return true if step completed (successfully), false otherwise
      */
     protected final boolean completeStep(Context context,
@@ -471,7 +463,7 @@ public class JSPStepManager
             SubmissionInfo subInfo) throws ServletException, IOException,
             SQLException, AuthorizeException
     {
-        log.info("Completing Step " + this.getClass().getName());
+        log.debug("Completing Step " + this.getClass().getName());
 
         // If a response has not already been sent to the web browser,
         // then forward control back to the SubmissionController
@@ -506,17 +498,17 @@ public class JSPStepManager
     /**
      * Checks to see if there are more pages in the current step after the
      * specified page
-     *
+     * 
      * @param request
      *            The HTTP Request object
      * @param subInfo
      *            The current submission information object
      * @param pageNumber
      *            The current page
-     *
+     * 
      * @throws ServletException
      *             if there are no more pages in this step
-     *
+     * 
      */
     protected final boolean hasMorePages(HttpServletRequest request,
             SubmissionInfo subInfo, int pageNumber) throws ServletException
@@ -528,10 +520,10 @@ public class JSPStepManager
 
     /**
      * Find out which page a user has reached in this particular step.
-     *
+     * 
      * @param subInfo
      *            Submission information
-     *
+     * 
      * @return page reached
      */
     public static final int getPageReached(SubmissionInfo subInfo)
@@ -551,7 +543,7 @@ public class JSPStepManager
 
     /**
      * Sets the number of the page reached for the specified step
-     *
+     * 
      * @param session
      *            HTTP session (where page reached is stored)
      * @param step
@@ -581,12 +573,12 @@ public class JSPStepManager
      * Return the number pages for the given step in the Submission Process
      * according to the Progress Bar. So, if "stepNum" is 7, this will return
      * the number of pages in step #7 (at least according to the progressBar)
-     *
+     * 
      * @param subInfo
      *            current Submission Information object
      * @param stepNum
      *            the number of the step
-     *
+     * 
      * @return the number of pages in the step
      */
     private static int getNumPagesInProgressBar(SubmissionInfo subInfo,
@@ -627,10 +619,10 @@ public class JSPStepManager
      * Retrieves the context path of the last JSP that was displayed to the
      * user. This is useful in the "doPostProcessing()" method to determine
      * which JSP has just submitted form information.
-     *
+     * 
      * @param request
      *            current servlet request object
-     *
+     * 
      * @return pathToJSP The context path to the JSP page (e.g.
      *         "/submit/select-collection.jsp")
      */
@@ -656,7 +648,7 @@ public class JSPStepManager
 
     /**
      * Saves the context path of the last JSP that was displayed to the user.
-     *
+     * 
      * @param request
      *            current servlet request object
      * @param pathToJSP
@@ -669,8 +661,8 @@ public class JSPStepManager
         // save to request
         request.setAttribute("jsp", pathToJSP);
     }
-
-
+    
+    
     /**
      * Return the URL path (e.g. /submit/review-metadata.jsp) of the JSP
      * which will review the information that was gathered in the currently
@@ -679,7 +671,7 @@ public class JSPStepManager
      * This Review JSP is loaded by the 'Verify' Step, in order to dynamically
      * generate a submission verification page consisting of the information
      * gathered in all the enabled submission steps.
-     *
+     * 
      * @param context
      *            current DSpace context
      * @param request
@@ -694,5 +686,5 @@ public class JSPStepManager
     {
         return stepJSPUI.getReviewJSP(context, request, response, subInfo);
     }
-
+    
 }
